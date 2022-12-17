@@ -1,7 +1,3 @@
-h1{
-    font-family: monospace;
-}
-
 body  {
   background-image: url("https://wallpaperaccess.com/full/242352.png");
   background-color: #cccccc;
@@ -9,6 +5,7 @@ body  {
 
 html{
     color: white;
+    font-family: monospace;
 }
 
 .maintext{
