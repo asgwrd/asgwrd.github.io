@@ -10,3 +10,7 @@ body  {
 html{
     color: white;
 }
+
+.maintext{
+  align-self: center;
+}
