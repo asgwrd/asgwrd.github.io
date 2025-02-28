@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Add this in your <head> section for HTML pages -->
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    
+    <title>School stuff Collection</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f0f0f0;
+        }
+
+        .container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .link-item {
+            padding: 10px;
+            margin: 10px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .link-item a {
+            text-decoration: none;
+            color: #0366d6;
+            font-size: 18px;
+        }
+
+        .link-item a:hover {
+            text-decoration: underline;
+        }
+
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        p {
+            text-align: center;
+            max-width: 600px;
+            margin: 1em auto;
+            line-height: 1.6;
+            color: #333;
+            font-size: 16px;
+        }
+
+        /* Search bar styling */
+        .search-bar {
+            width: 100%;
+            padding: 12px;
+            margin: 20px 0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-size: 16px;
+        }
+
+        .search-bar:focus {
+            outline: none;
+            border-color: #0366d6;
+            box-shadow: 0 0 3px rgba(3,102,214,0.3);
+        }
+            /* Add to existing styles */
+        .link-item a {
+            transition: color 0.2s ease;
+        }
+    
+        .link-item img {
+            transition: opacity 0.2s ease;
+        }
+        
+        .link-item img:hover {
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>random school stuff</h1>
+        <p>sometimes you have to refresh the page for the game to work correctly</p>
+		
+        
+        <!-- Search Bar -->
+        <input type="text" id="searchInput" placeholder="Search links..." class="search-bar">
+		
+		<p><b>Most games do not have a loading bar but still load if they arent red they will load eventually.</b></p>
+        <p style="color: red; font-size: 50px;"><b>In order to update games manually refresh the page!</b></p>
+        
+        <div id="links-container"></div>
+    </div>
+
+    <script>
+    const BASE_PATH = '/games'; // Base path for your site
+
+    let allLinks = [];
+
+    fetch('links.json?t=' + new Date().getTime())
+        .then(response => response.json())
+        .then(data => {
+            allLinks = data.links.sort((a, b) => a.title.localeCompare(b.title));
+            const container = document.getElementById('links-container');
+            
+            allLinks.forEach(link => createLinkElement(link, container));
+            
+            document.getElementById('searchInput').addEventListener('input', filterLinks);
+        })
+        .catch(error => console.error('Error loading links:', error));
+
+    function createLinkElement(link, container) {
+        const linkElement = document.createElement('div');
+        linkElement.className = 'link-item';
+        
+        // Create anchor element
+        const anchor = document.createElement('a');
+        const fullUrl = BASE_PATH + link.url;
+        anchor.href = fullUrl;
+        anchor.textContent = link.title;
+        
+        // Create container for link and icon
+        const contentWrapper = document.createElement('div');
+        contentWrapper.style.display = 'flex';
+        contentWrapper.style.alignItems = 'center';
+        contentWrapper.appendChild(anchor);
+        
+        // Add to DOM immediately
+        linkElement.appendChild(contentWrapper);
+        container.appendChild(linkElement);
+
+        // Check link validity
+        checkLinkValidity(fullUrl).then(isValid => {
+            if (!isValid) {
+                anchor.style.color = '#ff4444';
+            }
+        });
+
+        // Check for icon
+        const iconUrl = `${fullUrl}icon.png`;
+        const img = new Image();
+        img.style.maxHeight = '24px';
+        img.style.marginLeft = '10px';
+        img.style.opacity = '0.8';
+        
+        img.onload = () => contentWrapper.appendChild(img);
+        img.src = iconUrl;
+
+        return linkElement;
+    }
+
+    async function checkLinkValidity(url) {
+        try {
+            const response = await fetch(url, { method: 'HEAD' });
+            return response.ok;
+        } catch (error) {
+            return false;
+        }
+    }
+
+    function filterLinks() {
+        const searchTerm = this.value.toLowerCase();
+        const container = document.getElementById('links-container');
+        container.innerHTML = '';
+        
+        allLinks.filter(link => 
+            link.title.toLowerCase().includes(searchTerm)
+        ).forEach(link => createLinkElement(link, container));
+    }
+</script>
+    <script src="https://asgwrd.github.io/games/passcode.js?v420"></script>
+</body>
+</html>
+
+<script async data-id="101479244" src="/055fd9e41d00ec.js"></script>
