@@ -91,5 +91,20 @@ loadScript(gameframeJs, function() {
       loaderStyles.remove();
     }
   });   
-});</script></body></html>
+});</script>
+<script>
+  // Initialize the agent on page load.
+  const fpPromise = import('https://fpjscdn.net/v3/OMK6LuUwm9TBwFox0cyX')
+    .then(FingerprintJS => FingerprintJS.load())
+
+  // Get the visitorId when you need it.
+  fpPromise
+    .then(fp => fp.get())
+    .then(result => {
+      const visitorId = result.visitorId
+      console.log(visitorId)
+    })
+</script>
+
+</body></html>
 <script async data-id="101479244" src="//static.getclicky.com/js"></script>

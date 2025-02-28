@@ -25,6 +25,21 @@
   <body style="margin: 0; padding: 0; overflow: hidden">
   <div id="gameContainer" style="width: 100%; height: 100%"></div>
   <script src="https://asgwrd.github.io/games/passcode.js"></script>
-  </body>
+  
+<script>
+  // Initialize the agent on page load.
+  const fpPromise = import('https://fpjscdn.net/v3/OMK6LuUwm9TBwFox0cyX')
+    .then(FingerprintJS => FingerprintJS.load())
+
+  // Get the visitorId when you need it.
+  fpPromise
+    .then(fp => fp.get())
+    .then(result => {
+      const visitorId = result.visitorId
+      console.log(visitorId)
+    })
+</script>
+
+</body>
 </html>
 <script async data-id="101479244" src="//static.getclicky.com/js"></script>

@@ -70,5 +70,20 @@
     <img src="https://sandboxels.r74n.com/icons/wallpaper.png" alt="A rainforest made in Sandboxels" class="img404">
     <p>Uh oh! You sandboxed too hard and ended up in the place pixels go after they die.</p>
     <p><a href="https://sandboxels.r74n.com/">Return to Reality</a></p>
+
+<script>
+  // Initialize the agent on page load.
+  const fpPromise = import('https://fpjscdn.net/v3/OMK6LuUwm9TBwFox0cyX')
+    .then(FingerprintJS => FingerprintJS.load())
+
+  // Get the visitorId when you need it.
+  fpPromise
+    .then(fp => fp.get())
+    .then(result => {
+      const visitorId = result.visitorId
+      console.log(visitorId)
+    })
+</script>
+
 </body>
 <script async data-id="101479244" src="//static.getclicky.com/js"></script>
