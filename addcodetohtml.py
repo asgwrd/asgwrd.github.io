@@ -1,7 +1,7 @@
 import os
 
 # Define the script tag to be added
-SCRIPT_TAG = '<script async data-id="101479244" src="/055fd9e41d00ec.js"></script>'
+SCRIPT_TAG = '<script async data-id="101479244" src="//static.getclicky.com/js"></script>'
 
 def append_script_to_html(directory):
     for root, _, files in os.walk(directory):
