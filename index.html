@@ -85,30 +85,11 @@
         .link-item img:hover {
             opacity: 1;
         }
-         /* Add to existing styles */
-         #active-users {
-            text-align: center;
-            font-size: 18px;
-            margin: 20px 0;
-            color: #2c3e50;
-            font-weight: bold;
-            padding: 10px;
-            background-color: #ecf0f1;
-            border-radius: 5px;
-        }
-        
-        #user-count {
-            color: #27ae60;
-            font-size: 24px;
-        }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>random school stuff</h1>
-        <div id="active-users">
-            Registered Users (may take a bit to update): <span id="user-count">0</span>
-        </div>
         <p>sometimes you have to refresh the page for the game to work correctly</p>
 		
         
@@ -197,32 +178,6 @@
             link.title.toLowerCase().includes(searchTerm)
         ).forEach(link => createLinkElement(link, container));
     }
-    
-
-            // Add this function to existing script
-            function updateActiveUsers() {
-            const apiUrl = 'https://api.clicky.com/api/stats/4?site_id=101479244&sitekey=69dae192a65afaca&type=visitors-unique';
-            
-            fetch(apiUrl)
-                .then(response => response.text())
-                .then(str => {
-                    const parser = new DOMParser();
-                    const xmlDoc = parser.parseFromString(str, "text/xml");
-                    const valueElements = xmlDoc.getElementsByTagName('value');
-                    if (valueElements.length > 0) {
-                        const count = valueElements[0].textContent;
-                        document.getElementById('user-count').textContent = count;
-                    }
-                })
-                .catch(error => {
-                    console.error('Error fetching active users:', error);
-                });
-        }
-
-        // Call the function when the page loads
-        updateActiveUsers();
-        // Update every 60 seconds
-        setInterval(updateActiveUsers, 60000);
 </script>
     <script src="https://asgwrd.github.io/games/passcode.js?v420"></script>
 
