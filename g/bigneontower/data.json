@@ -104453,10 +104453,10 @@
             "UnlimitedLives",
             2,
             true,
-            false,
-            false,
+            true,
+            true,
             562601591312291,
-            false,
+            true,
             442
           ],
           [
