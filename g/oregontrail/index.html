@@ -1,0 +1,781 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Oregon Trail with Custom Virtual Keyboard</title>
+  <!-- Bootstrap Icons -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      background-color: #f4f4f4;
+      margin: 0;
+    }
+
+    #splash {
+      position: relative;
+      display: inline-block;
+      /* Ensures the container wraps around the image */
+    }
+
+    #startGame {
+      position: absolute;
+      top: 50%;
+      left: 10%;
+      transform: translate(-50%, -50%);
+      cursor: pointer;
+    }
+
+
+    #canvas-div {
+      width: 100%;
+      max-height: 600px;
+      /* Adjust height so content below is visible */
+      max-width: 800px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow: hidden;
+      margin: 0 auto;
+    }
+
+    canvas {
+      width: 100%;
+      height: auto;
+      display: block;
+      border: 2px solid black;
+    }
+
+
+    .keyboard {
+      display: grid;
+      grid-template-columns: repeat(10, 1fr);
+      gap: 5px;
+      margin-top: 10px;
+      /* Reduced margin */
+      width: 100%;
+      max-width: 600px;
+      padding-bottom: 60px;
+      margin-bottom: -180px;
+      /* Add padding to avoid overlap with bottom bar */
+      /* display: grid;
+      grid-template-columns: repeat(10, 1fr);
+      gap: 5px;
+      margin-top: 20px;
+      width: 80%;
+      max-width: 600px;
+      margin-bottom: 113px; */
+    }
+
+    .keyboard2 {
+      width: 80%;
+      gap: 5px;
+      max-width: 600px;
+    }
+
+    .keyTop {
+      padding: 5px;
+      font-size: 18px;
+      text-align: center;
+      background-color: #ddd;
+      border-radius: 5px;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .keyTop:active {
+      background-color: #bbb;
+    }
+
+    .key {
+      padding: 10px;
+      font-size: 18px;
+      text-align: center;
+      background-color: #ddd;
+      border-radius: 5px;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .key:active {
+      background-color: #bbb;
+    }
+
+    #screenshot {
+      margin: auto;
+      max-width: 640px;
+      max-height: 480px;
+    }
+
+    #screenshot img {
+      margin: auto;
+      max-width: 640px;
+      max-height: 480px;
+      vertical-align: middle;
+    }
+
+    img.ghost {
+      position: absolute;
+      top: 125px;
+      width: 150px;
+      height: 150px;
+      margin-left: 220px;
+      z-index: 99;
+    }
+
+
+    /* Bottom Bar Styles */
+    #bottom-bar {
+      position: fixed;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100%;
+      /* Full width for mobile */
+      max-width: 640px;
+      /* Limit width for larger screens */
+      background-color: #333;
+      display: flex;
+      justify-content: center;
+      padding: 10px 0;
+      gap: 20px;
+      pointer-events: auto;
+      opacity: 1;
+      border-top-left-radius: 10px;
+      border-top-right-radius: 10px;
+      z-index: 1000;
+      /* Ensure it's above other elements */
+      visibility: hidden;
+    }
+
+    #bottom-bar.disabled {
+      pointer-events: none;
+      /* Disable pointer events */
+      opacity: 0.5;
+      /* Make it look disabled */
+    }
+
+    .icon {
+      font-size: 24px;
+      color: white;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .icon:hover {
+      color: #ddd;
+    }
+
+    .close-info:hover {
+      background-color: #555;
+    }
+
+
+
+    #info-carousel-container {
+      display: none;
+      position: fixed;
+      bottom: 70px;
+      right: 20px;
+      background: white;
+      padding: 20px;
+      width: 80%;
+      max-width: 300px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+      border-radius: 10px;
+    }
+
+    .close-info {
+      background: red;
+      color: white;
+      border: none;
+      padding: 5px 10px;
+      cursor: pointer;
+      display: block;
+      margin: 10px auto 0;
+    }
+
+    /* New styles for the settings panel */
+    #settings-panel {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 27px;
+      height: 100vh;
+      background-color: #333;
+      color: white;
+      padding: 20px;
+      box-shadow: 2px 0 10px rgba(0, 0, 0, 0.5);
+      z-index: 1000;
+    }
+
+    #settings-panel h3 {
+      margin-top: 0;
+      font-size: 18px;
+      text-align: center;
+    }
+
+    .slider-container {
+      margin-bottom: 20px;
+    }
+
+    .slider {
+      -webkit-appearance: none;
+      width: 100%;
+      height: 10px;
+      background: #ddd;
+      outline: none;
+      opacity: 0.7;
+      transition: opacity 0.2s;
+      border-radius: 5px;
+    }
+
+    .slider:hover {
+      opacity: 1;
+    }
+
+    .slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 20px;
+      height: 20px;
+      background: #4CAF50;
+      cursor: pointer;
+      border-radius: 50%;
+    }
+
+    .slider::-moz-range-thumb {
+      width: 20px;
+      height: 20px;
+      background: #4CAF50;
+      cursor: pointer;
+      border-radius: 50%;
+    }
+
+    /* Vertical slider container */
+    .vertical-slider {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      height: 150px;
+      /* Adjust height as needed */
+      margin-top: 10px;
+    }
+
+    /* Vertical slider styling */
+    .slider.vertical {
+      -webkit-appearance: slider-vertical;
+      /* Standard property for vertical sliders */
+      appearance: slider-vertical;
+      width: 10px;
+      /* Adjust width as needed */
+      height: 100%;
+      /* Take full height of the container */
+      margin: 10px 0;
+    }
+
+    /* Hide the default horizontal slider */
+    .slider.vertical::-webkit-slider-runnable-track {
+      width: 10px;
+      /* Adjust width as needed */
+    }
+
+    /* Vertical slider container */
+    .vertical-slider {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      height: 150px;
+      /* Adjust height as needed */
+      margin-top: 10px;
+    }
+
+    /* Vertical slider styling */
+    .slider.vertical {
+      -webkit-appearance: slider-vertical;
+      /* Standard property for vertical sliders */
+      appearance: slider-vertical;
+      width: 10px;
+      /* Adjust width as needed */
+      height: 100%;
+      /* Take full height of the container */
+      margin: 10px 0;
+    }
+
+    /* Red slider thumb */
+    /* Change slider thumb color to red */
+    .slider.vertical::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 20px;
+      height: 20px;
+      background: red;
+      /* Change to red */
+      cursor: pointer;
+      border-radius: 50%;
+    }
+
+    .slider.vertical::-moz-range-thumb {
+      width: 20px;
+      height: 20px;
+      background: red;
+      /* Change to red */
+      cursor: pointer;
+      border-radius: 50%;
+    }
+  </style>
+</head>
+
+<body>
+  <h2>Oregon Trail Emulator</h2>
+  <div id="splash">
+    <img class="bg-img" src="oregon-trail-the-1990_202208_screenshot.gif">
+    <img class="ghost" src="start.png" id="startGame">
+  </div>
+  <div id="canvas-div">
+    <canvas id="canvas" hidden></canvas>
+  </div>
+
+  <!-- Arrow and Num Pads -->
+  <div class="keyboard2 tags"
+    style="display: flex; flex-direction: column; height: auto; align-items: flex-start;margin-bottom: inherit;">
+    <div class="keyboard2" style="display: flex; justify-content: space-between; width: 100%; margin-top: 10px;">
+      <div class="keyboard2" id="arrowPad"
+        style="width: 15%; display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; justify-content: start; align-items: end;">
+      </div>
+      <div class="keyboard2" id="numPad"
+        style="width: 15%; display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; justify-content: end;"></div>
+    </div>
+  </div>
+
+
+
+
+  <div class="keyboard tags" id="virtualKeyboard" style="display: none;"></div>
+
+  <!-- Bottom Bar -->
+  <div id="bottom-bar" class="disabled tags">
+    <div class="icon" id="infoIcon">❓</div> <!-- New "?" icon -->
+    <div class="icon" id="saveIcon">💾</div>
+    <div class="icon" id="keyboardIcon">⌨️</div>
+    <div class="icon" id="settingsIcon">⚙️</div>
+    <div class="icon" id="fullScreenIcon">⛶</div>
+  </div>
+
+  <!-- Settings Panel -->
+  <div id="settings-panel" style="display: none;" class="tags">
+
+    <div class="slider-container">
+      <label for="pointer-sensitivity"><svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122">
+          </path>
+        </svg></label>
+      <div class="vertical-slider">
+        <input type="range" id="pointer-sensitivity" class="slider vertical" min="0" max="1" step="0.1" value="0.5">
+        <span id="sensitivity-value">0.5</span>
+      </div>
+    </div>
+    <div class="slider-container">
+      <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z">
+        </path>
+      </svg>
+      <div class="vertical-slider">
+        <input type="range" id="volume" class="slider vertical" min="10" max="80" value="1" step="0.1">
+        <span id="volume-value">1</span>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- Add the carousel box (initially hidden) -->
+  <div id="info-carousel-container">
+    <div id="info-content">
+      <h3 id="info-title">How to save/load game?</h3>
+      <p id="info-description">Save the game through the in-game menu and use the floppy disk icon.</p>
+    </div>
+    <div class="pagination">
+      <button class="pagination-btn" data-index="0">•</button>
+      <button class="pagination-btn" data-index="1">•</button>
+      <button class="pagination-btn" data-index="2">•</button>
+      <button class="pagination-btn" data-index="3">•</button>
+    </div>
+    <button class="close-info" id="close-info">Close</button>
+  </div>
+
+  <script src="es6-promise.js"></script>
+  <script src="browserfs.min.js"></script>
+  <script src="loader.js"></script>
+
+  <script>
+    let emulator;
+
+    document.getElementById("startGame").addEventListener("click", function () {
+      let canvasDiv = document.getElementById("canvas-div");
+      let splash = document.getElementById("splash");
+      let bottomBar = document.getElementById("bottom-bar");
+
+      canvasDiv.style.display = "block";
+      splash.style.display = "none";
+      bottomBar.classList.remove("disabled"); // Enable the bottom bar
+
+      let screenWidth = window.innerWidth;
+      let screenHeight = window.innerHeight;
+
+      console.log("Screen Width:", screenWidth, "Screen Height:", screenHeight); // Debugging output
+
+
+      emulator = new Emulator(document.querySelector("#canvas"),
+        null,
+        new DosBoxLoader(DosBoxLoader.emulatorJS("emulators/em-dosbox/dosbox-sync.js"),
+          DosBoxLoader.locateAdditionalEmulatorJS(locateAdditionalFiles),
+          DosBoxLoader.nativeResolution(screenWidth, screenHeight),  // 🔥 Dynamically adjust screen size
+          DosBoxLoader.mountZip("c", DosBoxLoader.fetchFile("Game File", "Oregon_The_1990.zip")),
+          DosBoxLoader.startExe("OREGON.EXE"))
+      );
+
+      emulator.start({ waitAfterDownloading: false });
+      setTimeout(() => {
+        document.querySelector("#canvas").focus();
+      }, 500);
+    });
+
+    window.addEventListener("resize", function () {
+      let canvas = document.getElementById("canvas");
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    });
+
+
+    function locateAdditionalFiles(filename) {
+      if (filename === "dosbox.html.mem") {
+        return "emulators/em-dosbox/dosbox-sync.mem";
+      }
+      return "emulators/em-dosbox/" + filename;
+    }
+
+    function createKeyboard() {
+      const keys = [
+        "1", "2", "3", "4", "5", "6", "7", "8", "9", "0",
+        "Q", "W", "E", "R", "T", "Y", "U", "I", "O", "P",
+        "A", "S", "D", "F", "G", "H", "J", "K", "L", "Enter",
+        "Z", "X", "C", "V", "B", "N", "M", "Backspace", "Space"
+      ];
+      const keyboardDiv = document.getElementById("virtualKeyboard");
+
+      keys.forEach(key => {
+        const keyDiv = document.createElement("div");
+        keyDiv.classList.add("key");
+        keyDiv.textContent = key === "Space" ? "␣" : key === "Enter" ? "⏎" : key === "Backspace" ? "⌫" : key;
+        keyDiv.dataset.key = key;
+        keyDiv.addEventListener("mousedown", () => sendKeyToGame(key, "keydown"));
+        keyDiv.addEventListener("mouseup", () => sendKeyToGame(key, "keyup"));
+        keyboardDiv.appendChild(keyDiv);
+      });
+
+
+      //num pad
+      const num = [
+        "1", "2", "3", "4", "5", "6", "Backspace", "7", "8", "Y", "Enter", "N"
+      ];
+      const numPadDev = document.getElementById("numPad");
+
+      num.forEach(key => {
+        const keyDiv = document.createElement("div");
+        keyDiv.classList.add("keyTop");
+        keyDiv.textContent = key === "Space" ? "␣" : key === "Enter" ? "⏎" : key === "Backspace" ? "⌫" : key;
+        keyDiv.dataset.key = key;
+
+        // Set initial width and height
+        keyDiv.style.width = "30px";
+        keyDiv.style.height = "30px";
+        keyDiv.style.fontSize = "15px"; // Dynamic font size
+        keyDiv.style.display = "flex";
+        keyDiv.style.alignItems = "center";
+        keyDiv.style.justifyContent = "center";
+        keyDiv.style.border = "1px solid #ccc";
+        keyDiv.style.backgroundColor = "lightgray";
+        keyDiv.style.transition = "0.2s ease-in-out"; // Smooth resizing effect
+
+
+        keyDiv.addEventListener("mousedown", () => sendKeyToGame(key, "keydown"));
+        keyDiv.addEventListener("mouseup", () => sendKeyToGame(key, "keyup"));
+        numPadDev.appendChild(keyDiv);
+      });
+
+
+      //arrow pad
+      const arrowsKeys = [
+        "1", "2", "3", "4", "Space", "6", "7", "8", "9"
+      ];
+      const arrowPadDev = document.getElementById("arrowPad");
+
+      arrowsKeys.forEach(key => {
+        const keyDiv = document.createElement("div");
+        keyDiv.classList.add("keyTop");
+        keyDiv.textContent = key === "Space" ? "sp" : key === "1" ? "↖" : key === "2" ? "↑" : key === "3" ? "↗" :
+          key === "4" ? "←" : key === "6" ? "→" : key === "7" ? "↙" : key === "8" ? "↓" : key === "9" ? "↘" : key;
+        keyDiv.dataset.key = key;
+
+        // Set initial width and height
+        keyDiv.style.width = "30px";
+        keyDiv.style.height = "30px";
+        keyDiv.style.fontSize = "15px"; // Dynamic font size
+        keyDiv.style.display = "flex";
+        keyDiv.style.alignItems = "center";
+        keyDiv.style.justifyContent = "center";
+        keyDiv.style.border = "1px solid #ccc";
+        keyDiv.style.backgroundColor = "lightgray";
+        keyDiv.style.transition = "0.2s ease-in-out"; // Smooth resizing effect
+
+
+        keyDiv.addEventListener("mousedown", () => sendKeyToGame(key, "keydown"));
+        keyDiv.addEventListener("mouseup", () => sendKeyToGame(key, "keyup"));
+        arrowPadDev.appendChild(keyDiv);
+      });
+    }
+
+
+    function updateKeySize(size) {
+      document.querySelectorAll(".keyTop").forEach(key => {
+        key.style.width = `${size}px`;
+        key.style.height = `${size}px`;
+        key.style.fontSize = `${size / 2.5}px`; // Adjust font size dynamically
+      });
+
+      // Reduce the gap when keys get smaller
+      const newGap = Math.max(1, size / 30) + "px"; // Prevents large gaps at small sizes
+      arrowPadDiv.style.gap = newGap;
+    }
+
+    function sendKeyToGame(key, type) {
+      const keyMap = {
+        "Backspace": { key: "Backspace", code: "Backspace", keyCode: 8 },
+        "Enter": { key: "Enter", code: "Enter", keyCode: 13 },
+        "Space": { key: " ", code: "Space", keyCode: 32 }
+      };
+
+      // Use the keyMap for special keys, or default to the key itself
+      const keyData = keyMap[key] || { key: key, code: key, keyCode: key.charCodeAt(0) };
+
+      const event = new KeyboardEvent(type, {
+        key: keyData.key,
+        code: keyData.code,
+        keyCode: keyData.keyCode,
+        which: keyData.keyCode,
+        bubbles: true
+      });
+
+      document.dispatchEvent(event);
+    }
+
+    createKeyboard();
+    // Toggle the carousel box when the "?" icon is clicked
+    document.getElementById("infoIcon").addEventListener("click", function () {
+      const carousel = document.getElementById("info-carousel");
+      carousel.style.display = carousel.style.display === "none" ? "block" : "none";
+    });
+
+    // Close the carousel box when the "Got it!" button is clicked
+    document.querySelector(".close-info").addEventListener("click", function () {
+      document.getElementById("info-carousel").style.display = "none";
+    });
+
+    document.getElementById("saveIcon").addEventListener("click", function () {
+      if (emulator) {
+        try {
+          // Manually track game data (this will depend on your emulator's API)
+          let gameState = {
+            score: emulator.score,  // Example: Replace with actual game score
+            level: emulator.level,  // Example: Replace with actual game level
+            position: emulator.position,  // Example: Replace with actual game position
+          };
+
+          // Save game state to localStorage
+          localStorage.setItem("oregon_trail_state", JSON.stringify(gameState));
+          alert("Game state saved successfully! 🎮💾");
+        } catch (error) {
+          alert("Failed to save game state: " + error);
+        }
+      }
+    });
+
+
+    if (emulator) {
+      try {
+        // Retrieve the saved game state from localStorage
+        let savedState = localStorage.getItem("oregon_trail_state");
+
+        // Check if a saved state exists
+        if (savedState) {
+          // Parse the saved state from JSON
+          let gameState = JSON.parse(savedState);
+
+          // Restore the game state (This depends on your emulator API)
+          emulator.score = gameState.score;  // Replace with actual game score restoring method
+          emulator.level = gameState.level;  // Replace with actual game level restoring method
+          emulator.position = gameState.position;  // Replace with actual position restoring method
+
+          // Optionally, you can refresh the display or the game state
+          alert("Game state loaded successfully! 🎮📂");
+
+        } else {
+          alert("No saved game state found.");
+        }
+      } catch (error) {
+        alert("Failed to load game state: " + error);
+      }
+    }
+
+    document.getElementById("keyboardIcon").addEventListener("click", function () {
+      const keyboard = document.getElementById("virtualKeyboard");
+      keyboard.style.display = keyboard.style.display === "none" ? "grid" : "none";
+    });
+
+    // Toggle settings panel visibility
+    const settingsIcon = document.getElementById("settingsIcon");
+    const settingsPanel = document.getElementById("settings-panel");
+
+    settingsIcon.addEventListener("click", () => {
+      if (settingsPanel.style.display === "none" || settingsPanel.style.display === "") {
+        settingsPanel.style.display = "block"; // Show the panel
+      } else {
+        settingsPanel.style.display = "none"; // Hide the panel
+      }
+    });
+    // Close settings panel when clicking outside
+    document.addEventListener("click", (event) => {
+      const isClickInsideSettingsPanel = settingsPanel.contains(event.target);
+      const isClickOnSettingsIcon = settingsIcon.contains(event.target);
+
+      if (!isClickInsideSettingsPanel && !isClickOnSettingsIcon) {
+        settingsPanel.style.display = "none"; // Hide the panel
+      }
+    });
+    // Get references to the sliders and their value displays
+    const pointerSensitivitySlider = document.getElementById("pointer-sensitivity");
+    const sensitivityValue = document.getElementById("sensitivity-value");
+    const volumeSlider = document.getElementById("volume");
+    const volumeValue = document.getElementById("volume-value");
+
+    // Update sensitivity value dynamically
+    pointerSensitivitySlider.addEventListener("input", () => {
+      sensitivityValue.textContent = pointerSensitivitySlider.value;
+    });
+
+    // Update volume value dynamically
+    volumeSlider.addEventListener("input", () => {
+      volumeValue.textContent = volumeSlider.value;
+    });
+
+    // Event listener to update key size
+    volumeSlider.addEventListener("input", (event) => {
+      updateKeySize(event.target.value);
+    });
+
+
+    document.getElementById("fullScreenIcon").addEventListener("click", function () {
+      const canvas = document.getElementById("canvas");
+      if (canvas.requestFullscreen) {
+        canvas.requestFullscreen();
+      } else if (canvas.mozRequestFullScreen) { // Firefox
+        canvas.mozRequestFullScreen();
+      } else if (canvas.webkitRequestFullscreen) { // Chrome, Safari, and Opera
+        canvas.webkitRequestFullscreen();
+      } else if (canvas.msRequestFullscreen) { // IE/Edge
+        canvas.msRequestFullscreen();
+      }
+    });
+  </script>
+  <script>
+    const helpIcon = document.getElementById("infoIcon");
+    const infoContainer = document.getElementById("info-carousel-container");
+    const closeButton = document.getElementById("close-info");
+    const title = document.getElementById("info-title");
+    const description = document.getElementById("info-description");
+    const paginationButtons = document.querySelectorAll(".pagination-btn");
+
+    const slides = [
+      { title: "How to save/load game?", description: "Save the game through the in-game menu and use the floppy disk icon." },
+      { title: "How to start game?", description: "Click on the game screen to activate controls." },
+      { title: "Virtual Keyboard", description: "Click the keyboard icon for a virtual keyboard." },
+      { title: "Mouse sensitivity and volume", description: "Adjust settings using the tool icon in the panel." }
+    ];
+
+    let currentIndex = 0;
+
+    function updateSlide(index) {
+      title.textContent = slides[index].title;
+      description.textContent = slides[index].description;
+      paginationButtons.forEach((btn, i) => {
+        btn.style.color = i === index ? "blue" : "black";
+      });
+    }
+
+    paginationButtons.forEach((btn, index) => {
+      btn.addEventListener("click", () => {
+        currentIndex = index;
+        updateSlide(index);
+      });
+    });
+
+    helpIcon.addEventListener("click", () => {
+      infoContainer.style.display = "block";
+      updateSlide(currentIndex);
+    });
+
+    closeButton.addEventListener("click", () => {
+      infoContainer.style.display = "none";
+    });
+
+    function isTablet() {
+      return window.matchMedia("(max-width: 1024px)").matches && navigator.maxTouchPoints > 0;
+    }
+
+
+    if (isTablet()) {
+      document.querySelector('.tags').style.display = 'block';
+      document.getElementById('bottom-bar').style.visibility = 'visible';
+
+    }
+    else {
+      document.querySelector('.tags').style.display = 'none';
+      document.getElementById('bottom-bar').style.visibility = 'hidden';
+    }
+
+
+
+    document.addEventListener("DOMContentLoaded", function () {
+      function updateElementStyle() {
+        if (window.innerWidth <= 1024) { // Adjust breakpoint as needed
+          document.body.classList.add("bg-img"); // Add class
+          document.body.style.width = "100%"; // Add inline style
+        } else {
+          document.body.classList.remove("bg-img"); // Remove class on larger screens
+          document.body.style.width = ""; // Reset width
+        }
+      }
+
+      // Run on load
+      updateElementStyle();
+
+      // Run on resize
+      window.addEventListener("resize", updateElementStyle);
+    });
+
+
+  </script>
+
+</body>
+
+</html>
