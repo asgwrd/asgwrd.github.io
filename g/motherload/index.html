@@ -8,7 +8,7 @@
     <script src="https://unpkg.com/@ruffle-rs/ruffle"></script>
 </head>
 <body>
-  <h1>RIGHT-CLICK AND SELECT FULLSCREEN FOR FULLSCREEN</h1>
+    <h1>RIGHT-CLICK AND SELECT FULLSCREEN FOR FULLSCREEN</h1>
     <div style="text-align: center;">
         <!-- Ruffle container -->
         <div id="ruffle-container"></div>
@@ -23,11 +23,17 @@
             const container = document.getElementById("ruffle-container");
             container.appendChild(player);
             
+            // Apply Ruffle configuration for fullscreen stretching
+            player.config = {
+                letterbox: "none",  // Stretch to fill screen
+                unmuteOverlay: "hidden"
+            };
+
             // Load the SWF file
             player.load("Godzilla.swf");
         });
     </script>
-	<script src="https://asgwrd.github.io/games/passcode.js"></script>
+    <script src="https://asgwrd.github.io/games/passcode.js"></script>
 
 </body>
 </html>
